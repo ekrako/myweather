@@ -8,21 +8,30 @@ import { WeatherService } from '../../app/services/weather.service';
   templateUrl: 'weather.html'
 })
 export class WeatherPage {
-  city: string;
-  state: string;
+  zmw: string;
   weather: any;
   searchStr: string;
   results: any;
+  location: any;
   constructor(public navCtrl: NavController, private weatherService: WeatherService) {
-    this.city = 'New_York';
-    this.state = 'NY';
+
   }
 
   ngOnInit() {
-    this.weatherService.getWeather(this.city, this.state)
+    this.getDefaultLocation();
+    this.weatherService.getWeather(this.zmw)
       .subscribe(weather => {
         this.weather = weather.current_observation;
       });
+  }
+
+  getDefaultLocation() {
+    if (localStorage.getItem('location') !== null) {
+      console.log(JSON.parse(localStorage.getItem('location')));
+      this.zmw = JSON.parse(localStorage.getItem('location')).zmw;
+    } else {
+      this.zmw = '00000.7.40176';
+    }
   }
   getQuery() {
     this.weatherService.searchCities(this.searchStr)
@@ -30,10 +39,13 @@ export class WeatherPage {
         this.results = res.RESULTS;
       });
   }
-  chooseCity(city){
-    this.results=[];
-    this.searchStr=null;
-    console.log(city);
+  chooseLocation(location) {
+    this.results = [];
+    this.searchStr = null;
+    this.weatherService.getWeather(location.zmw)
+      .subscribe(weather => {
+        this.weather = weather.current_observation;
+      });
   }
 
 }
